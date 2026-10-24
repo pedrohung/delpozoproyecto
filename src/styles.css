@@ -59,29 +59,46 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-navy: var(--brand-navy);
+  --color-flag: var(--brand-blue);
+  --color-cuban: var(--brand-red);
+  --color-gold: var(--brand-gold);
+  --color-cream: var(--brand-cream);
+  --color-free: var(--free);
+  --color-busy: var(--brand-red);
+  --font-display: "Alfa Slab One", Georgia, serif;
+  --font-script: "Pinyon Script", cursive;
+  --font-sans: "Figtree Variable", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Colores de marca: valores por defecto, la configuración los sobrescribe en vivo */
+  --brand-navy: #011530;
+  --brand-blue: #00247d;
+  --brand-red: #ce2029;
+  --brand-gold: #c9a227;
+  --brand-cream: #fdf5ea;
+  --free: oklch(0.68 0.17 150);
+  --radius: 0.75rem;
+  --background: var(--brand-cream);
+  --foreground: var(--brand-navy);
+  --card: color-mix(in oklab, var(--brand-cream) 60%, white);
+  --card-foreground: var(--brand-navy);
+  --popover: var(--brand-cream);
+  --popover-foreground: var(--brand-navy);
+  --primary: var(--brand-navy);
+  --primary-foreground: var(--brand-cream);
+  --secondary: color-mix(in oklab, var(--brand-gold) 18%, var(--brand-cream));
+  --secondary-foreground: var(--brand-navy);
+  --muted: color-mix(in oklab, var(--brand-navy) 6%, var(--brand-cream));
+  --muted-foreground: color-mix(in oklab, var(--brand-navy) 60%, var(--brand-cream));
+  --accent: var(--brand-gold);
+  --accent-foreground: var(--brand-navy);
+  --destructive: var(--brand-red);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: color-mix(in oklab, var(--brand-gold) 35%, var(--brand-cream));
+  --input: color-mix(in oklab, var(--brand-gold) 35%, var(--brand-cream));
+  --ring: var(--brand-gold);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -132,6 +149,77 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Pantallas del personal: azul marino, lectura de un vistazo */
+.staff {
+  --background: var(--brand-navy);
+  --foreground: var(--brand-cream);
+  --card: color-mix(in oklab, var(--brand-navy) 82%, var(--brand-blue));
+  --card-foreground: var(--brand-cream);
+  --popover: color-mix(in oklab, var(--brand-navy) 85%, var(--brand-blue));
+  --popover-foreground: var(--brand-cream);
+  --primary: var(--brand-gold);
+  --primary-foreground: var(--brand-navy);
+  --secondary: color-mix(in oklab, var(--brand-navy) 70%, var(--brand-blue));
+  --secondary-foreground: var(--brand-cream);
+  --muted: color-mix(in oklab, var(--brand-navy) 75%, var(--brand-blue));
+  --muted-foreground: color-mix(in oklab, var(--brand-cream) 65%, var(--brand-navy));
+  --border: color-mix(in oklab, var(--brand-gold) 25%, var(--brand-navy));
+  --input: color-mix(in oklab, var(--brand-gold) 30%, var(--brand-navy));
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@utility font-display { font-family: var(--font-display); letter-spacing: 0.01em; }
+@utility font-script { font-family: var(--font-script); }
+@utility gold-frame {
+  border: 2px solid var(--brand-gold);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-gold) 20%, transparent), 0 20px 40px -20px color-mix(in oklab, var(--brand-navy) 60%, transparent);
+}
+@utility text-gold-gradient {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--brand-gold) 70%, white), var(--brand-gold) 55%, color-mix(in oklab, var(--brand-gold) 70%, black));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@utility bg-hero-veil {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--brand-navy) 30%, transparent) 0%, color-mix(in oklab, var(--brand-navy) 55%, transparent) 55%, var(--brand-navy) 100%);
+}
+@utility bg-flag-band {
+  background: repeating-linear-gradient(180deg, var(--brand-blue) 0 8px, var(--brand-cream) 8px 16px);
+}
+@utility btn-gold {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--brand-gold) 80%, white), var(--brand-gold));
+  color: var(--brand-navy); font-weight: 700; border-radius: 9999px; padding: .85rem 1.6rem;
+  box-shadow: 0 8px 24px -10px var(--brand-gold); transition: transform .15s, box-shadow .15s;
+  &:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -10px var(--brand-gold); }
+  &:active { transform: scale(.97); }
+  &:disabled { opacity: .45; transform: none; }
+}
+@utility btn-red {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  background: var(--brand-red); color: var(--brand-cream); font-weight: 700; border-radius: 9999px; padding: .85rem 1.6rem;
+  transition: transform .15s; &:hover { transform: translateY(-2px); } &:active { transform: scale(.97); }
+}
+@utility btn-ghost-gold {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  border: 1.5px solid var(--brand-gold); color: inherit; font-weight: 600; border-radius: 9999px; padding: .8rem 1.5rem;
+  transition: background .15s; &:hover { background: color-mix(in oklab, var(--brand-gold) 18%, transparent); }
+}
+@utility animate-pop { animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
+@utility animate-star { animation: starspin 1.1s cubic-bezier(.2,1.2,.3,1) both; }
+@utility animate-pulse-ring { animation: ring 1.6s ease-out infinite; }
+
+@keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+@keyframes starspin { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes ring { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand-gold) 70%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
+
+/* Impresión: solo el ticket */
+.print-area { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { display: block; position: absolute; inset: 0 auto auto 0; width: 72mm; color: black; background: white; font-family: ui-monospace, monospace; font-size: 12px; }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -140,5 +228,6 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
 }
