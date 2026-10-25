@@ -14,6 +14,7 @@ import { Route as AccesoRouteImport } from './routes/acceso'
 import { Route as BarRouteImport } from './routes/bar'
 import { Route as CartaRouteImport } from './routes/carta'
 import { Route as CocinaRouteImport } from './routes/cocina'
+import { Route as MostradorRouteImport } from './routes/mostrador'
 import { Route as SalonRouteImport } from './routes/salon'
 import { Route as TiendaRouteImport } from './routes/tienda'
 
@@ -42,6 +43,11 @@ const CocinaRoute = CocinaRouteImport.update({
   path: '/cocina',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MostradorRoute = MostradorRouteImport.update({
+  id: '/mostrador',
+  path: '/mostrador',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalonRoute = SalonRouteImport.update({
   id: '/salon',
   path: '/salon',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
+  '/mostrador': typeof MostradorRoute
   '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
+  '/mostrador': typeof MostradorRoute
   '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
@@ -78,15 +86,31 @@ export interface FileRoutesById {
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
+  '/mostrador': typeof MostradorRoute
   '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/acceso' | '/bar' | '/carta' | '/cocina' | '/salon' | '/tienda'
+    | '/'
+    | '/acceso'
+    | '/bar'
+    | '/carta'
+    | '/cocina'
+    | '/mostrador'
+    | '/salon'
+    | '/tienda'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/acceso' | '/bar' | '/carta' | '/cocina' | '/salon' | '/tienda'
+  to:
+    | '/'
+    | '/acceso'
+    | '/bar'
+    | '/carta'
+    | '/cocina'
+    | '/mostrador'
+    | '/salon'
+    | '/tienda'
   id:
     | '__root__'
     | '/'
@@ -94,6 +118,7 @@ export interface FileRouteTypes {
     | '/bar'
     | '/carta'
     | '/cocina'
+    | '/mostrador'
     | '/salon'
     | '/tienda'
   fileRoutesById: FileRoutesById
@@ -104,6 +129,7 @@ export interface RootRouteChildren {
   BarRoute: typeof BarRoute
   CartaRoute: typeof CartaRoute
   CocinaRoute: typeof CocinaRoute
+  MostradorRoute: typeof MostradorRoute
   SalonRoute: typeof SalonRoute
   TiendaRoute: typeof TiendaRoute
 }
@@ -145,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CocinaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mostrador': {
+      id: '/mostrador'
+      path: '/mostrador'
+      fullPath: '/mostrador'
+      preLoaderRoute: typeof MostradorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/salon': {
       id: '/salon'
       path: '/salon'
@@ -168,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   BarRoute: BarRoute,
   CartaRoute: CartaRoute,
   CocinaRoute: CocinaRoute,
+  MostradorRoute: MostradorRoute,
   SalonRoute: SalonRoute,
   TiendaRoute: TiendaRoute,
 }
