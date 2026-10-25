@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccesoRouteImport } from './routes/acceso'
+import { Route as BarRouteImport } from './routes/bar'
 import { Route as CartaRouteImport } from './routes/carta'
+import { Route as CocinaRouteImport } from './routes/cocina'
+import { Route as SalonRouteImport } from './routes/salon'
 import { Route as TiendaRouteImport } from './routes/tienda'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +27,24 @@ const AccesoRoute = AccesoRouteImport.update({
   path: '/acceso',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BarRoute = BarRouteImport.update({
+  id: '/bar',
+  path: '/bar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CartaRoute = CartaRouteImport.update({
   id: '/carta',
   path: '/carta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CocinaRoute = CocinaRouteImport.update({
+  id: '/cocina',
+  path: '/cocina',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalonRoute = SalonRouteImport.update({
+  id: '/salon',
+  path: '/salon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TiendaRoute = TiendaRouteImport.update({
@@ -38,34 +56,55 @@ const TiendaRoute = TiendaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
+  '/cocina': typeof CocinaRoute
+  '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
+  '/cocina': typeof CocinaRoute
+  '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
+  '/cocina': typeof CocinaRoute
+  '/salon': typeof SalonRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/acceso' | '/carta' | '/tienda'
+  fullPaths:
+    '/' | '/acceso' | '/bar' | '/carta' | '/cocina' | '/salon' | '/tienda'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/acceso' | '/carta' | '/tienda'
-  id: '__root__' | '/' | '/acceso' | '/carta' | '/tienda'
+  to: '/' | '/acceso' | '/bar' | '/carta' | '/cocina' | '/salon' | '/tienda'
+  id:
+    | '__root__'
+    | '/'
+    | '/acceso'
+    | '/bar'
+    | '/carta'
+    | '/cocina'
+    | '/salon'
+    | '/tienda'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccesoRoute: typeof AccesoRoute
+  BarRoute: typeof BarRoute
   CartaRoute: typeof CartaRoute
+  CocinaRoute: typeof CocinaRoute
+  SalonRoute: typeof SalonRoute
   TiendaRoute: typeof TiendaRoute
 }
 
@@ -85,11 +124,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccesoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bar': {
+      id: '/bar'
+      path: '/bar'
+      fullPath: '/bar'
+      preLoaderRoute: typeof BarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/carta': {
       id: '/carta'
       path: '/carta'
       fullPath: '/carta'
       preLoaderRoute: typeof CartaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cocina': {
+      id: '/cocina'
+      path: '/cocina'
+      fullPath: '/cocina'
+      preLoaderRoute: typeof CocinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salon': {
+      id: '/salon'
+      path: '/salon'
+      fullPath: '/salon'
+      preLoaderRoute: typeof SalonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tienda': {
@@ -105,7 +165,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccesoRoute: AccesoRoute,
+  BarRoute: BarRoute,
   CartaRoute: CartaRoute,
+  CocinaRoute: CocinaRoute,
+  SalonRoute: SalonRoute,
   TiendaRoute: TiendaRoute,
 }
 export const routeTree = rootRouteImport
