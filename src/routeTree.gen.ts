@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccesoRouteImport } from './routes/acceso'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BarRouteImport } from './routes/bar'
 import { Route as CartaRouteImport } from './routes/carta'
 import { Route as CocinaRouteImport } from './routes/cocina'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AccesoRoute = AccesoRouteImport.update({
   id: '/acceso',
   path: '/acceso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BarRoute = BarRouteImport.update({
@@ -62,6 +68,7 @@ const TiendaRoute = TiendaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/admin': typeof AdminRoute
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/admin': typeof AdminRoute
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acceso': typeof AccesoRoute
+  '/admin': typeof AdminRoute
   '/bar': typeof BarRoute
   '/carta': typeof CartaRoute
   '/cocina': typeof CocinaRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acceso'
+    | '/admin'
     | '/bar'
     | '/carta'
     | '/cocina'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/acceso'
+    | '/admin'
     | '/bar'
     | '/carta'
     | '/cocina'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/acceso'
+    | '/admin'
     | '/bar'
     | '/carta'
     | '/cocina'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccesoRoute: typeof AccesoRoute
+  AdminRoute: typeof AdminRoute
   BarRoute: typeof BarRoute
   CartaRoute: typeof CartaRoute
   CocinaRoute: typeof CocinaRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/acceso'
       fullPath: '/acceso'
       preLoaderRoute: typeof AccesoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bar': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccesoRoute: AccesoRoute,
+  AdminRoute: AdminRoute,
   BarRoute: BarRoute,
   CartaRoute: CartaRoute,
   CocinaRoute: CocinaRoute,
