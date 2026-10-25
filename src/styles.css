@@ -214,6 +214,7 @@
 
 /* Impresión: solo el ticket */
 .print-area { display: none; }
+.print-area.print-show { display: block; }
 @media print {
   body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
