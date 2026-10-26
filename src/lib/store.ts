@@ -85,7 +85,7 @@ export function money(n: number, currency = getState().config.currency) {
   return `${n.toLocaleString("es-ES")} ${currency}`;
 }
 
-export interface CartLine { itemId: string; qty: number; note?: string }
+export interface CartLine { itemId: string; qty: number; note?: string | undefined }
 
 export function placeOrder(place: Place, origin: Order["origin"], cart: CartLine[]): Order | null {
   const { config } = getState();
