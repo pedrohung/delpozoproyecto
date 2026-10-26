@@ -31,11 +31,12 @@ type Tab = (typeof TABS)[number]["id"];
 
 function Admin() {
   const [tab, setTab] = useState<Tab>("marca");
+  const config = useStore((s) => s.config);
   return (
     <StaffShell area="admin">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex gap-2 overflow-x-auto">
-          {TABS.map((t) => (
+          {TABS.filter((t) => t.id !== "salon" || (config.modules.salon && (config.modules.cafeteria || config.modules.bar))).map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 whitespace-nowrap rounded-full border-2 px-4 py-2 text-sm font-bold ${tab === t.id ? "border-gold bg-gold text-navy" : "border-border"}`}><t.icon className="h-4 w-4" />{t.label}</button>
           ))}
         </div>
@@ -247,8 +248,8 @@ function TabQr() {
   const c = useStore((s) => s.config);
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const codes = [
-    ...Array.from({ length: c.salon.tables }, (_, k) => ({ label: `Mesa ${k + 1}`, url: `${origin}/carta?mesa=${k + 1}` })),
-    ...Array.from({ length: c.salon.stools }, (_, k) => ({ label: `Banqueta ${k + 1}`, url: `${origin}/carta?banqueta=${k + 1}` })),
+    ...Array.from({ length: (c.modules.cafeteria || c.modules.bar) && c.modules.salon ? c.salon.tables : 0 }, (_, k) => ({ label: `Mesa ${k + 1}`, url: `${origin}/carta?mesa=${k + 1}` })),
+    ...Array.from({ length: (c.modules.cafeteria || c.modules.bar) && c.modules.salon ? c.salon.stools : 0 }, (_, k) => ({ label: `Banqueta ${k + 1}`, url: `${origin}/carta?banqueta=${k + 1}` })),
     ...(c.modules.tienda ? [{ label: "Tienda", url: `${origin}/tienda` }] : []),
   ];
   return (
