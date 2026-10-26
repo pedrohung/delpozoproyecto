@@ -21,6 +21,7 @@ export interface Item {
   categoryId: string;
   area: Area | null; // solo platos de la carta
   available: boolean;
+  stock?: number; // Solo tienda; ausente en platos de carta.
   photo?: string;
 }
 
@@ -55,6 +56,7 @@ export interface BrandConfig {
 
 const i = (id: string, categoryId: string, name: string, description: string, price: number, area: Area | null): Item => ({
   id, categoryId, name, description, price, area, available: true,
+  ...(area === null ? { stock: 20 } : {}),
 });
 
 export const defaultBrand: BrandConfig = {

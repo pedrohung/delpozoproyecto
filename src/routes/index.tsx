@@ -5,6 +5,7 @@ import { PhotoSlot } from "@/components/brand/PhotoSlot";
 import { ModuleError } from "@/components/brand/ModuleState";
 import { photoSrc } from "@/lib/photos";
 import { useStore } from "@/lib/store";
+import { menuItemEnabled } from "@/lib/modules";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,7 +27,7 @@ function Home() {
     c.modules.cafeteria && { icon: Coffee, label: "Coffee" },
     c.modules.bar && { icon: Beer, label: "Bar" },
   ].filter(Boolean) as { icon: typeof Coffee; label: string }[];
-  const cats = c.categories.filter((k) => (k.kind === "tienda" ? c.modules.tienda : c.modules[k.line]));
+  const cats = c.categories.filter((k) => (k.kind === "tienda" ? c.modules.tienda : c.modules[k.line] && c.items.some((i) => i.categoryId === k.id && menuItemEnabled(c, i))));
 
   return (
     <div className="bg-background">
@@ -76,7 +77,7 @@ function Home() {
       </section>
 
       {/* AMBIENTE */}
-      <section className="bg-navy text-cream">
+      {(c.modules.cafeteria || c.modules.bar) && <section className="bg-navy text-cream">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-20 md:grid-cols-2">
           <div className="overflow-hidden rounded-2xl gold-frame aspect-[4/3]"><PhotoSlot photo={c.photos.interior} alt="Interior del local" /></div>
           <div>
@@ -85,7 +86,7 @@ function Home() {
             <div className="mt-8 h-3 w-40 rounded-full bg-flag-band" />
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* DATOS */}
       <section className="mx-auto max-w-6xl px-5 py-16">

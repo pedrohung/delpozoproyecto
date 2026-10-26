@@ -30,7 +30,7 @@ export function Estacion({ area, titulo, shellArea }: { area: Area; titulo: stri
   const orders = s.orders
     .filter((o) => !o.paid && o.lines.some((l) => l.area === area && l.status !== "servido"))
     .sort((a, b) => a.createdAt - b.createdAt);
-  const pendingCount = s.orders.flatMap((o) => o.lines).filter((l) => l.area === area && l.status === "pendiente").length;
+  const pendingCount = s.orders.filter((o) => !o.paid).flatMap((o) => o.lines).filter((l) => l.area === area && l.status === "pendiente").length;
 
   useEffect(() => {
     if (prevCount.current !== null && pendingCount > prevCount.current) beep();
@@ -39,6 +39,7 @@ export function Estacion({ area, titulo, shellArea }: { area: Area; titulo: stri
 
   useEffect(() => {
     if (printOrder) { const t = setTimeout(() => { window.print(); setPrintOrder(null); }, 80); return () => clearTimeout(t); }
+    return undefined;
   }, [printOrder]);
 
   return (

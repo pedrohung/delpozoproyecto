@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { Delete } from "lucide-react";
 import { StarLogo } from "@/components/brand/StarLogo";
 import { ModuleError } from "@/components/brand/ModuleState";
-import { login, ownerLogin, roleHome, useStore } from "@/lib/store";
+import { login, ownerLogin, sessionHome, logout, useStore } from "@/lib/store";
 import { roleLabel } from "@/config/brand";
 
 export const Route = createFileRoute("/acceso")({
-  validateSearch: (s: Record<string, unknown>): { modo?: "propietario" } => ({ modo: s.modo === "propietario" ? "propietario" : undefined }),
+  validateSearch: (s: Record<string, unknown>): { modo?: "propietario" | undefined } => ({ modo: s["modo"] === "propietario" ? "propietario" : undefined }),
   head: () => ({ meta: [
     { title: "Acceso del personal — La Estrella Cubana" },
     { name: "description", content: "Entrada y fichaje del personal con código personal." },
@@ -32,8 +32,10 @@ function Acceso() {
   const submit = (v: string) => {
     const s = login(v);
     if (!s) { setMsg({ ok: false, text: "Código incorrecto" }); setCode(""); return; }
+    const destination = sessionHome(s);
+    if (!destination) { logout(false); setMsg({ ok: false, text: "Tu puesto no está activo en este local" }); setCode(""); return; }
     setMsg({ ok: true, text: `Hola, ${s.name} · ${roleLabel[s.role as keyof typeof roleLabel]} · entrada fichada` });
-    setTimeout(() => nav({ to: roleHome[s.role as keyof typeof roleHome] }), 900);
+    setTimeout(() => nav({ to: destination }), 900);
   };
   const press = (d: string) => { if (code.length >= 6) return; const v = code + d; setCode(v); setMsg(null); if (v.length === 4) submit(v); };
 

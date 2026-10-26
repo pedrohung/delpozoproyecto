@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Minus, Plus, MessageSquare } from "lucide-react";
 import { PhotoSlot } from "@/components/brand/PhotoSlot";
 import { money, useStore, type CartLine } from "@/lib/store";
+import { menuItemEnabled } from "@/lib/modules";
 
 /** Lista de platos por categoría con − / + y nota para cocina. Compartida por Carta (QR) y Comanda. */
 export function MenuPicker({ cart, setCart, initialCat, compact = false }: {
-  cart: CartLine[]; setCart: (c: CartLine[]) => void; initialCat?: string; compact?: boolean;
+  cart: CartLine[]; setCart: (c: CartLine[]) => void; initialCat?: string | undefined; compact?: boolean;
 }) {
   const c = useStore((s) => s.config);
-  const cats = c.categories.filter((k) => k.kind === "carta" && c.modules[k.line]);
+  const cats = c.categories.filter((k) => k.kind === "carta" && c.modules[k.line] && c.items.some((i) => i.categoryId === k.id && menuItemEnabled(c, i)));
   const [cat, setCat] = useState(initialCat && cats.some((k) => k.id === initialCat) ? initialCat : cats[0]?.id);
   const [noteFor, setNoteFor] = useState<string | null>(null);
-  const items = c.items.filter((i) => i.categoryId === cat);
+  const activeCat = cats.some((k) => k.id === cat) ? cat : cats[0]?.id;
+  const items = c.items.filter((i) => i.categoryId === activeCat && menuItemEnabled(c, i));
   const get = (id: string) => cart.find((x) => x.itemId === id);
   const upd = (id: string, patch: Partial<CartLine>) => {
     const cur = get(id) ?? { itemId: id, qty: 0 };
