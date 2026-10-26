@@ -3,7 +3,7 @@ import { photoSrc } from "@/lib/photos";
 import { StarLogo } from "./StarLogo";
 
 /** Foto del negocio o, si aún no hay, un hueco elegante listo para rellenar. */
-export function PhotoSlot({ photo, alt, className = "", eager = false }: { photo?: string; alt: string; className?: string; eager?: boolean }) {
+export function PhotoSlot({ photo, alt, className = "", eager = false }: { photo?: string | undefined; alt: string; className?: string; eager?: boolean }) {
   const src = photoSrc(photo);
   if (src) return <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} className={`h-full w-full object-cover ${className}`} />;
   return (

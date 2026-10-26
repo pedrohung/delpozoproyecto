@@ -4,6 +4,8 @@ import { LogOut, Clock } from "lucide-react";
 import { StarLogo } from "@/components/brand/StarLogo";
 import { ModuleUnavailable } from "@/components/brand/ModuleState";
 import { canAccess, logout, useStore, type State } from "@/lib/store";
+import { moduleEnabled } from "@/lib/modules";
+import { ModuleGate } from "@/components/brand/ModuleGate";
 
 type Area = "salon" | "cocina" | "bar" | "mostrador" | "admin";
 
@@ -28,12 +30,10 @@ export function StaffShell({ area, children }: { area: Area; children: ReactNode
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const session = state.session;
-  const nav = NAV.filter((n) => n.on(state) && canAccess(session, n.area));
-  const enabled = NAV.find((n) => n.area === area)!.on(state);
+  const nav = NAV.filter((n) => moduleEnabled(state.config, n.area) && canAccess(session, n.area));
 
   let body: ReactNode = children;
   if (!hydrated) body = null;
-  else if (!enabled) body = <ModuleUnavailable title="Módulo apagado" detail="Este módulo no está activo en la configuración del negocio." />;
   else if (!canAccess(session, area)) body = (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-5 text-center">
       <StarLogo className="h-16 w-16" />
@@ -43,7 +43,7 @@ export function StaffShell({ area, children }: { area: Area; children: ReactNode
   );
 
   return (
-    <div className="staff min-h-screen">
+    <ModuleGate area={area}><div className="staff min-h-screen">
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur">
         <Link to="/" className="flex items-center gap-2"><StarLogo className="h-9 w-9" /><span className="hidden font-display text-lg sm:inline">{state.config.name}</span></Link>
         <nav className="ml-2 flex flex-1 gap-1 overflow-x-auto">
@@ -61,6 +61,6 @@ export function StaffShell({ area, children }: { area: Area; children: ReactNode
         )}
       </header>
       <main className="p-4 md:p-6">{body}</main>
-    </div>
+    </div></ModuleGate>
   );
 }
