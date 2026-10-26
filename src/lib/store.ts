@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { menuItemEnabled, moduleEnabled, shopStock, type StaffArea } from "@/lib/modules";
 import { defaultBrand, type Area, type BrandConfig, type Line, type Role } from "@/config/brand";
 
 export type PlaceKind = "mesa" | "banqueta" | "mostrador";
@@ -6,7 +7,7 @@ export interface Place { kind: PlaceKind; n: number }
 export type LineStatus = "pendiente" | "preparando" | "listo" | "servido";
 
 export interface OrderLine {
-  itemId: string; name: string; price: number; qty: number; note?: string;
+  itemId: string; name: string; price: number; qty: number; note?: string | undefined;
   area: Area | null; categoryId: string; line: Line; status: LineStatus;
 }
 export interface Order {
@@ -42,7 +43,12 @@ function load() {
   loaded = true;
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) state = { ...initial, ...JSON.parse(raw) };
+    if (raw) {
+      state = { ...initial, ...JSON.parse(raw) };
+      state = { ...state, config: { ...state.config, items: state.config.items.map((i) =>
+        state.config.categories.some((k) => k.id === i.categoryId && k.kind === "tienda") && i.stock === undefined
+          ? { ...i, stock: i.available ? 20 : 0 } : i) } };
+    }
   } catch { /* estado por defecto */ }
   window.addEventListener("storage", (e) => {
     if (e.key === KEY && e.newValue) {
@@ -83,11 +89,12 @@ export interface CartLine { itemId: string; qty: number; note?: string }
 
 export function placeOrder(place: Place, origin: Order["origin"], cart: CartLine[]): Order | null {
   const { config } = getState();
-  const lines: OrderLine[] = cart.filter((c) => c.qty > 0).map((c) => {
-    const it = config.items.find((x) => x.id === c.itemId)!;
+  const lines: OrderLine[] = cart.filter((c) => c.qty > 0).flatMap((c): OrderLine[] => {
+    const it = config.items.find((x) => x.id === c.itemId);
+    if (!it || !it.available || !menuItemEnabled(config, it) || !Number.isInteger(c.qty)) return [];
     const cat = config.categories.find((x) => x.id === it.categoryId);
-    return { itemId: it.id, name: it.name, price: it.price, qty: c.qty, note: c.note, area: it.area,
-      categoryId: it.categoryId, line: cat?.line ?? "cafeteria", status: "pendiente" };
+    return [{ itemId: it.id, name: it.name, price: it.price, qty: c.qty, note: c.note, area: it.area,
+      categoryId: it.categoryId, line: cat?.line ?? "cafeteria", status: "pendiente" }];
   });
   if (!lines.length) return null;
   let order: Order | null = null;
@@ -132,13 +139,26 @@ export function closeAccount(place: Place, via: Sale["via"] = "comanda") {
 
 export function shopSale(cart: CartLine[]): Sale | null {
   const { config } = getState();
-  const lines: OrderLine[] = cart.filter((c) => c.qty > 0).map((c) => {
-    const it = config.items.find((x) => x.id === c.itemId)!;
-    return { itemId: it.id, name: it.name, price: it.price, qty: c.qty, area: null, categoryId: it.categoryId, line: "tienda", status: "servido" };
-  });
+  if (!config.modules.tienda) return null;
+  const quantities = new Map<string, number>();
+  for (const line of cart) {
+    if (!Number.isInteger(line.qty) || line.qty <= 0) return null;
+    quantities.set(line.itemId, (quantities.get(line.itemId) ?? 0) + line.qty);
+  }
+  const lines: OrderLine[] = [];
+  for (const [id, qty] of quantities) {
+    const it = config.items.find((x) => x.id === id);
+    if (!it || !it.available || !config.categories.some((k) => k.id === it.categoryId && k.kind === "tienda") || qty > shopStock(it)) return null;
+    lines.push({ itemId: it.id, name: it.name, price: it.price, qty, area: null, categoryId: it.categoryId, line: "tienda", status: "servido" });
+  }
   if (!lines.length) return null;
   const sale: Sale = { id: uid(), at: Date.now(), total: lineTotal(lines), via: "tienda", lines };
-  setState((s) => ({ ...s, sales: [...s.sales, sale] }));
+  setState((s) => ({ ...s, sales: [...s.sales, sale], config: { ...s.config, items: s.config.items.map((it) => {
+    const qty = quantities.get(it.id);
+    if (!qty) return it;
+    const stock = shopStock(it) - qty;
+    return { ...it, stock, available: stock > 0 };
+  }) } }));
   return sale;
 }
 
@@ -181,4 +201,22 @@ export function canAccess(session: Session | null, area: "salon" | "cocina" | "b
   if (area === "admin") return false;
   if (session.role === "encargado") return true;
   return ({ salon: "camarero", cocina: "cocinero", bar: "barman", mostrador: "dependiente" } as const)[area] === session.role;
+}
+
+// Destination permitted for this post in the active local profile.
+export function sessionHome(session: Session, config = getState().config) {
+  const choices: StaffArea[] = ["salon", "cocina", "bar", "mostrador", "admin"];
+  const area = choices.find((a) => canAccess(session, a) && moduleEnabled(config, a));
+  return area ? ({ salon: "/salon", cocina: "/cocina", bar: "/bar", mostrador: "/mostrador", admin: "/admin" } as const)[area] : null;
+}
+
+export function dayReport(s: State, now = Date.now()) {
+  const date = new Date(now);
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime();
+  const sales = s.sales.filter((v) => v.at >= start && v.at < end);
+  const byLine = (["tienda", "cafeteria", "bar"] as const).map((l) => ({ l, n: sales.flatMap((v) => v.lines).filter((x) => x.line === l).reduce((a, x) => a + x.price * x.qty, 0) }));
+  const byVia = (["qr", "comanda", "tienda"] as const).map((v) => ({ v, n: sales.filter((x) => x.via === v).reduce((a, x) => a + x.total, 0) }));
+  const hours = s.punches.filter((p) => p.in < end && (p.out ?? now) >= start).map((p) => ({ p, h: Math.max(0, Math.min(p.out ?? now, end) - Math.max(p.in, start)) / 36e5 }));
+  return { sales, total: sales.reduce((a, v) => a + v.total, 0), byLine, byVia, hours };
 }

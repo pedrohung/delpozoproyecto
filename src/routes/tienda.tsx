@@ -2,18 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { StarLogo } from "@/components/brand/StarLogo";
 import { PhotoSlot } from "@/components/brand/PhotoSlot";
+import { ModuleGate } from "@/components/brand/ModuleGate";
 import { ModuleError, ModuleUnavailable } from "@/components/brand/ModuleState";
 import { money, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/tienda")({
-  validateSearch: (s: Record<string, unknown>): { cat?: string } => ({ cat: typeof s.cat === "string" ? s.cat : undefined }),
+  validateSearch: (s: Record<string, unknown>): { cat?: string | undefined } => ({ cat: typeof s["cat"] === "string" ? s["cat"] : undefined }),
   head: () => ({ meta: [
     { title: "La tienda — La Estrella Cubana" },
     { name: "description", content: "Alimentos, confitería, bebidas y aseo en Maceo 28, Manzanillo. Mira qué hay hoy." },
     { property: "og:title", content: "La tienda de La Estrella Cubana" },
     { property: "og:description", content: "Catálogo con precios y disponibilidad del día." },
   ] }),
-  component: Tienda,
+  component: () => <ModuleGate area="tienda"><Tienda /></ModuleGate>,
   errorComponent: ModuleError,
 });
 
@@ -22,7 +23,6 @@ function Tienda() {
   const c = useStore((s) => s.config);
   const cats = c.categories.filter((k) => k.kind === "tienda");
   const [sel, setSel] = useState<string | "all">(cat ?? "all");
-  if (!c.modules.tienda) return <ModuleUnavailable title="La tienda no está activa" />;
   const shown = cats.filter((k) => sel === "all" || k.id === sel);
 
   return (

@@ -2,17 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
 import { StarLogo } from "@/components/brand/StarLogo";
+import { ModuleGate } from "@/components/brand/ModuleGate";
 import { ModuleError, ModuleUnavailable } from "@/components/brand/ModuleState";
 import { MenuPicker } from "@/components/MenuPicker";
 import { money, placeLabel, placeOrder, requestBill, useStore, getState, type CartLine, type Order, type Place } from "@/lib/store";
 
-type Search = { mesa?: number; banqueta?: number; cat?: string };
+type Search = { mesa?: number | undefined; banqueta?: number | undefined; cat?: string | undefined };
 
 export const Route = createFileRoute("/carta")({
   validateSearch: (s: Record<string, unknown>): Search => ({
-    mesa: s.mesa ? Number(s.mesa) : undefined,
-    banqueta: s.banqueta ? Number(s.banqueta) : undefined,
-    cat: typeof s.cat === "string" ? s.cat : undefined,
+    mesa: s["mesa"] ? Number(s["mesa"]) : undefined,
+    banqueta: s["banqueta"] ? Number(s["banqueta"]) : undefined,
+    cat: typeof s["cat"] === "string" ? s["cat"] : undefined,
   }),
   head: () => ({ meta: [
     { title: "La carta — La Estrella Cubana" },
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/carta")({
     { property: "og:title", content: "La carta de La Estrella Cubana" },
     { property: "og:description", content: "Pide desde tu mesa leyendo el QR." },
   ] }),
-  component: Carta,
+  component: () => <ModuleGate area="carta"><Carta /></ModuleGate>,
   errorComponent: ModuleError,
 });
 
@@ -34,7 +35,6 @@ function Carta() {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
 
-  if (ready && !c.modules.cafeteria && !c.modules.bar) return <ModuleUnavailable title="La carta no está activa" />;
   const total = cart.reduce((a, l) => a + (getState().config.items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty, 0);
   const count = cart.reduce((a, l) => a + l.qty, 0);
 

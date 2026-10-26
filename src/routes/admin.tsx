@@ -6,7 +6,7 @@ import { StaffShell } from "@/components/staff/StaffShell";
 import { StarLogo } from "@/components/brand/StarLogo";
 import { ModuleError } from "@/components/brand/ModuleState";
 import { lineLabel, roleLabel, type Area, type Role } from "@/config/brand";
-import { money, setState, uid, updateConfig, useStore } from "@/lib/store";
+import { dayReport, money, setState, uid, updateConfig, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
@@ -81,7 +81,7 @@ function TabMarca() {
           <Field label="Ciudad"><input className={inputCls} value={c.city} onChange={(e) => set({ city: e.target.value })} /></Field>
           <Field label="Moneda"><input className={inputCls} value={c.currency} onChange={(e) => set({ currency: e.target.value })} /></Field>
         </div>
-        <Field label="Contraseña del propietario"><input className={inputCls} value={c.ownerPassword} onChange={(e) => set({ ownerPassword: e.target.value })} /></Field>
+        <Field label="Contraseña del propietario"><input type="password" className={inputCls} value={c.ownerPassword} onChange={(e) => set({ ownerPassword: e.target.value })} /></Field>
       </section>
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <h2 className="font-display text-lg">Colores de marca</h2>
@@ -114,7 +114,7 @@ function TabCarta() {
         <section key={k.id} className="rounded-2xl border border-border bg-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg">{k.name} <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-sans">{k.kind === "carta" ? lineLabel[k.line] : "Tienda"}</span></h2>
-            <button className="btn-ghost-gold !px-3 !py-1.5 text-sm" onClick={() => updateConfig((x) => ({ ...x, items: [...x.items, { id: uid(), categoryId: k.id, name: "Nuevo", description: "", price: 0, area: k.kind === "carta" ? "cocina" : null, available: true }] }))}><Plus className="h-4 w-4" /> Añadir</button>
+            <button className="btn-ghost-gold !px-3 !py-1.5 text-sm" onClick={() => updateConfig((x) => ({ ...x, items: [...x.items, { id: uid(), categoryId: k.id, name: "Nuevo", description: "", price: 0, area: k.kind === "carta" ? "cocina" : null, available: true, ...(k.kind === "tienda" ? { stock: 0, available: false } : {}) }] }))}><Plus className="h-4 w-4" /> Añadir</button>
           </div>
           <div className="space-y-2">
             {c.items.filter((i) => i.categoryId === k.id).map((it) => (
@@ -125,8 +125,8 @@ function TabCarta() {
                   <select className={inputCls} value={it.area ?? "cocina"} onChange={(e) => patchItem(it.id, { area: e.target.value as Area })}>
                     <option value="cocina">Cocina</option><option value="bar">Bar</option>
                   </select>
-                ) : <span className="hidden md:block" />}
-                <button onClick={() => patchItem(it.id, { available: !it.available })} className={`rounded-full px-3 py-2 text-xs font-bold ${it.available ? "bg-free text-navy" : "bg-cuban text-cream"}`}>{it.available ? "Hay" : "Se acabó"}</button>
+                ) : <Field label={`Stock · ${it.name}`}><input className={inputCls} type="number" min={0} step={1} value={it.stock ?? 0} onChange={(e) => { const stock = Math.max(0, Math.floor(Number(e.target.value) || 0)); patchItem(it.id, { stock, available: stock > 0 }); }} /></Field>}
+                <button disabled={k.kind === "tienda" && (it.stock ?? 0) === 0} onClick={() => patchItem(it.id, { available: !it.available })} className={`rounded-full px-3 py-2 text-xs font-bold ${it.available ? "bg-free text-navy" : "bg-cuban text-cream"}`}>{it.available ? "Hay" : "Se acabó"}</button>
                 <button aria-label="Eliminar" onClick={() => updateConfig((x) => ({ ...x, items: x.items.filter((i) => i.id !== it.id) }))} className="hidden justify-self-end rounded-full p-2 text-muted-foreground hover:text-cuban md:block"><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
@@ -167,13 +167,8 @@ function TabEquipo() {
 function TabVentas() {
   const s = useStore((x) => x);
   const [cierre, setCierre] = useState(false);
-  const today = new Date().toDateString();
-  const sales = s.sales.filter((v) => new Date(v.at).toDateString() === today);
-  const total = sales.reduce((a, v) => a + v.total, 0);
-  const byLine = (["tienda", "cafeteria", "bar"] as const).map((l) => ({ l, n: sales.flatMap((v) => v.lines).filter((x) => x.line === l).reduce((a, x) => a + x.price * x.qty, 0) }));
-  const byVia = (["qr", "comanda", "tienda"] as const).map((v) => ({ v, n: sales.filter((x) => x.via === v).reduce((a, x) => a + x.total, 0) }));
+  const { sales, total, byLine, byVia, hours } = dayReport(s);
   const viaLabel = { qr: "QR del cliente", comanda: "Comanda", tienda: "Mostrador" } as const;
-  const hours = s.punches.map((p) => ({ p, h: ((p.out ?? Date.now()) - p.in) / 36e5 }));
 
   return (
     <div className="space-y-6">

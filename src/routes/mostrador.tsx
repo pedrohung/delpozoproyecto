@@ -4,6 +4,7 @@ import { Minus, Plus, Search, Trash2 } from "lucide-react";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { StarLogo } from "@/components/brand/StarLogo";
 import { ModuleError } from "@/components/brand/ModuleState";
+import { shopStock } from "@/lib/modules";
 import { money, shopSale, useStore, type CartLine, type Sale } from "@/lib/store";
 
 export const Route = createFileRoute("/mostrador")({
@@ -24,9 +25,17 @@ function Mostrador() {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [done, setDone] = useState<Sale | null>(null);
 
-  const items = c.items.filter((i) => i.categoryId === cat && i.available && (!q || i.name.toLowerCase().includes(q.toLowerCase())));
+  const items = c.items.filter((i) => i.categoryId === cat && i.available && shopStock(i) > 0 && (!q || i.name.toLowerCase().includes(q.toLowerCase())));
   const get = (id: string) => cart.find((x) => x.itemId === id)?.qty ?? 0;
-  const upd = (id: string, qty: number) => setCart(qty <= 0 ? cart.filter((x) => x.itemId !== id) : [...cart.filter((x) => x.itemId !== id), { itemId: id, qty }]);
+  const upd = (id: string, qty: number) => {
+    const item = c.items.find((i) => i.id === id);
+    if (!item || qty > shopStock(item)) return;
+    setCart(qty <= 0 ? cart.filter((x) => x.itemId !== id) : [...cart.filter((x) => x.itemId !== id), { itemId: id, qty }]);
+  };
+  const validCart = cart.length > 0 && cart.every((l) => {
+    const item = c.items.find((i) => i.id === l.itemId);
+    return item && item.available && l.qty <= shopStock(item);
+  });
   const total = cart.reduce((a, l) => a + (c.items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty, 0);
 
   if (done) return (
@@ -56,9 +65,9 @@ function Mostrador() {
             {items.map((it) => {
               const qty = get(it.id);
               return (
-                <button key={it.id} onClick={() => upd(it.id, qty + 1)} className={`relative rounded-xl border-2 bg-card p-4 text-left transition active:scale-95 ${qty ? "border-gold" : "border-border"}`}>
+                <button key={it.id} disabled={qty >= shopStock(it)} onClick={() => upd(it.id, qty + 1)} className={`relative rounded-xl border-2 bg-card p-4 text-left transition active:scale-95 ${qty ? "border-gold" : "border-border"}`}>
                   <div className="font-semibold leading-tight">{it.name}</div>
-                  <div className="mt-1 font-display text-gold">{money(it.price, c.currency)}</div>
+                  <div className="text-xs text-muted-foreground">Stock: {shopStock(it)}</div><div className="mt-1 font-display text-gold">{money(it.price, c.currency)}</div>
                   {qty > 0 && <span key={qty} className="absolute right-2 top-2 grid h-8 w-8 animate-pop place-items-center rounded-full bg-gold font-display text-navy">{qty}</span>}
                 </button>
               );
@@ -70,13 +79,14 @@ function Mostrador() {
           <div className="max-h-80 flex-1 space-y-2 overflow-y-auto p-4">
             {cart.length === 0 && <p className="py-6 text-center text-muted-foreground">Toca productos para añadirlos.</p>}
             {cart.map((l) => {
-              const it = c.items.find((i) => i.id === l.itemId)!;
+              const it = c.items.find((i) => i.id === l.itemId);
+              if (!it) return null;
               return (
                 <div key={l.itemId} className="flex items-center gap-2 text-sm">
                   <span className="flex-1 font-semibold">{it.name}</span>
                   <button aria-label="Quitar" onClick={() => upd(l.itemId, l.qty - 1)} className="grid h-9 w-9 place-items-center rounded-full border border-border"><Minus className="h-4 w-4" /></button>
                   <span className="w-6 text-center font-bold">{l.qty}</span>
-                  <button aria-label="Añadir" onClick={() => upd(l.itemId, l.qty + 1)} className="grid h-9 w-9 place-items-center rounded-full bg-gold text-navy"><Plus className="h-4 w-4" /></button>
+                  <button aria-label="Añadir" disabled={l.qty >= shopStock(it)} onClick={() => upd(l.itemId, l.qty + 1)} className="grid h-9 w-9 place-items-center rounded-full bg-gold text-navy"><Plus className="h-4 w-4" /></button>
                   <span className="w-20 text-right font-semibold">{money(it.price * l.qty, c.currency)}</span>
                 </div>
               );
@@ -84,7 +94,7 @@ function Mostrador() {
           </div>
           <div className="space-y-3 border-t border-border p-4">
             <div className="flex justify-between font-display text-3xl"><span>Total</span><span key={total} className="animate-pop text-gold">{money(total, c.currency)}</span></div>
-            <button className="btn-gold w-full text-lg" disabled={!cart.length} onClick={() => { const sale = shopSale(cart); if (sale) setDone(sale); }}>Cobrar</button>
+            <button className="btn-gold w-full text-lg" disabled={!validCart} onClick={() => { const sale = shopSale(cart); if (sale) setDone(sale); }}>Cobrar</button>
             {cart.length > 0 && <button className="flex w-full items-center justify-center gap-1 text-sm text-muted-foreground" onClick={() => setCart([])}><Trash2 className="h-4 w-4" /> Vaciar</button>}
           </div>
         </aside>
